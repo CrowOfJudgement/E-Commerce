@@ -1,0 +1,67 @@
+import {
+  HydratedDocument,
+  Model,
+  ProjectionType,
+  QueryFilter,
+  QueryOptions,
+  UpdateQuery,
+} from 'mongoose';
+
+export default class BaseRepository<TDocument> {
+  constructor(protected readonly model: Model<TDocument>) {}
+
+  create(data: Partial<TDocument>): Promise<HydratedDocument<TDocument>> {
+    return this.model.create(data);
+  }
+
+  find({
+    filter = {},
+    projection,
+    options,
+  }: {
+    filter?: QueryFilter<TDocument>;
+    projection?: ProjectionType<TDocument>;
+    options?: QueryOptions<TDocument>;
+  } = {}): Promise<HydratedDocument<TDocument>[]> {
+    return this.model.find(filter, projection, options).exec();
+  }
+
+  findOne({
+    filter = {},
+    projection,
+    options,
+  }: {
+    filter?: QueryFilter<TDocument>;
+    projection?: ProjectionType<TDocument>;
+    options?: QueryOptions<TDocument>;
+  }): Promise<HydratedDocument<TDocument> | null> {
+    return this.model.findOne(filter, projection, options).exec();
+  }
+
+  findById(id: string): Promise<HydratedDocument<TDocument> | null> {
+    return this.model.findById(id).exec();
+  }
+
+  findOneAndUpdate({
+    filter,
+    update,
+    options,
+  }: {
+    filter: QueryFilter<TDocument>;
+    update: UpdateQuery<TDocument>;
+    options?: QueryOptions<TDocument>;
+  }): Promise<HydratedDocument<TDocument> | null> {
+    return this.model.findOneAndUpdate(filter, update, options).exec();
+  }
+
+  update(
+    id: string,
+    data: UpdateQuery<TDocument>,
+  ): Promise<HydratedDocument<TDocument> | null> {
+    return this.model.findByIdAndUpdate(id, data, { new: true }).exec();
+  }
+
+  delete(id: string): Promise<HydratedDocument<TDocument> | null> {
+    return this.model.findByIdAndDelete(id).exec();
+  }
+}
