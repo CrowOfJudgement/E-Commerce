@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './modules/user/user.module';
+import { BrandModule } from './modules/brand/brand.module';
+import { CategoryModule } from './modules/category/category.module';
 import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
@@ -26,6 +28,12 @@ import { Connection } from 'mongoose';
       },
     }),
     UserModule,
+    // Brand module for BrandModel & repository
+    BrandModule,
+    // Category module
+    CategoryModule,
+    // Product module
+    ProductModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -7,3 +7,8 @@ export enum RoleEnum {
   user = 'user',
   admin = 'admin',
 }
+
+export enum ProviderEnum {
+  Local = 'Local',
+  Google = 'Google',
+}

@@ -5,8 +5,10 @@ export const eventEmitter = new EventEmitter();
 
 type EmailEventCallback = () => Promise<void> | void;
 
-eventEmitter.on(emailEnum.confirmEmail, (fn: EmailEventCallback) => {
-  void Promise.resolve(fn()).catch((error: unknown) => {
-    console.error('Email event failed', error);
+Object.values(emailEnum).forEach((eventName) => {
+  eventEmitter.on(eventName, (fn: EmailEventCallback) => {
+    void Promise.resolve(fn()).catch((error: unknown) => {
+      console.error('Email event failed', error);
+    });
   });
 });

@@ -1,7 +1,11 @@
 import { Prop, Schema, SchemaFactory, MongooseModule } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import { z } from 'zod';
-import { GenderEnum, RoleEnum } from '../../common/enum/user.enum';
+import {
+  GenderEnum,
+  ProviderEnum,
+  RoleEnum,
+} from '../../common/enum/user.enum';
 
 @Schema({
   timestamps: true,
@@ -19,8 +23,8 @@ export class User {
   @Prop({ type: String, required: true })
   password: string;
 
-  @Prop({ type: String, required: true })
-  phone: string;
+  @Prop({ type: String })
+  phone?: string;
 
   @Prop({ type: Number })
   age?: number;
@@ -36,6 +40,12 @@ export class User {
 
   @Prop({ type: String, enum: RoleEnum, default: RoleEnum.user })
   role?: RoleEnum;
+
+  @Prop({ type: Boolean, default: false })
+  isConfirmed?: boolean;
+
+  @Prop({ type: String, enum: ProviderEnum, default: ProviderEnum.Local })
+  provider?: ProviderEnum;
 
   @Prop({ type: String })
   confirmEmailOtp?: string;
@@ -57,5 +67,7 @@ export const UserValidationSchema = z.object({
   profilePic: z.string().trim().optional(),
   gender: z.nativeEnum(GenderEnum).optional(),
   role: z.nativeEnum(RoleEnum).optional(),
+  isConfirmed: z.boolean().optional(),
+  provider: z.nativeEnum(ProviderEnum).optional(),
   confirmEmailOtp: z.string().optional(),
 });

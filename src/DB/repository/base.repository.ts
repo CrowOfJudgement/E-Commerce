@@ -64,4 +64,37 @@ export default class BaseRepository<TDocument> {
   delete(id: string): Promise<HydratedDocument<TDocument> | null> {
     return this.model.findByIdAndDelete(id).exec();
   }
+
+  async paginate({
+    filter = {},
+    projection,
+    page = 1,
+    limit = 10,
+    options,
+  }: {
+    filter?: QueryFilter<TDocument>;
+    projection?: ProjectionType<TDocument>;
+    page?: number;
+    limit?: number;
+    options?: QueryOptions<TDocument>;
+  }): Promise<{
+    data: HydratedDocument<TDocument>[];
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }> {
+    const pg = page && page > 0 ? page : 1;
+    const lim = limit && limit > 0 ? limit : 10;
+    const skip = (pg - 1) * lim;
+
+    const [total, data] = await Promise.all([
+      this.model.countDocuments(filter).exec(),
+      this.model.find(filter, projection, { ...options, skip, limit: lim }).exec(),
+    ]);
+
+    const totalPages = Math.ceil(total / lim) || 1;
+
+    return { data, total, page: pg, limit: lim, totalPages };
+  }
 }
