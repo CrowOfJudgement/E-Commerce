@@ -4,6 +4,7 @@ import slugify from 'slugify';
 import { User } from './user.model';
 import { Brand } from './brand.model';
 import { Category } from './category.model';
+import { applySoftDeleteQueryHooks } from './plugins/soft-delete.plugin';
 
 @Schema({
   timestamps: true,
@@ -46,6 +47,12 @@ export class Product {
 
   @Prop({ type: Types.ObjectId, ref: User.name })
   updatedBy: Types.ObjectId;
+
+  @Prop({ type: Boolean, default: false })
+  isDeleted: boolean;
+
+  @Prop({ type: Date })
+  deletedAt?: Date;
 }
 
 export type ProductDocument = HydratedDocument<Product>;
@@ -64,5 +71,7 @@ ProductSchema.pre('updateOne', function () {
     (updated as any).slug = slugify((updated as any).name, { replacement: '-', trim: true, lower: true });
   }
 });
+
+applySoftDeleteQueryHooks(ProductSchema);
 
 export const ProductModel = MongooseModule.forFeature([{ name: Product.name, schema: ProductSchema }]);

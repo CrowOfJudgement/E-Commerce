@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory, MongooseModule } from '@nestjs/mongoose';
 import { HydratedDocument, Types, UpdateQuery } from 'mongoose';
 import slugify from 'slugify';
 import { User } from './user.model';
+import { applySoftDeleteQueryHooks } from './plugins/soft-delete.plugin';
 
 @Schema({
   timestamps: true,
@@ -29,6 +30,12 @@ export class Brand {
 
   @Prop({ type: Types.ObjectId, ref: User.name })
   updatedBy: Types.ObjectId;
+
+  @Prop({ type: Boolean, default: false })
+  isDeleted: boolean;
+
+  @Prop({ type: Date })
+  deletedAt?: Date;
 }
 
 export type BrandDocument = HydratedDocument<Brand>;
@@ -45,6 +52,17 @@ BrandSchema.pre('updateOne', function () {
   if (updated && (updated as any).name) {
     (updated as any).slug = slugify((updated as any).name, { replacement: '-', trim: true, lower: true });
   }
+});
+
+applySoftDeleteQueryHooks(BrandSchema);
+
+BrandSchema.post('findOneAndUpdate', async function (doc: BrandDocument | null) {
+  if (!doc?.isDeleted) return;
+
+  await doc.db.model('Product').updateMany(
+    { brand: doc._id, isDeleted: { $ne: true } },
+    { isDeleted: true, deletedAt: doc.deletedAt ?? new Date() },
+  );
 });
 export const BrandModel = MongooseModule.forFeature([
   { name: Brand.name, schema: BrandSchema },

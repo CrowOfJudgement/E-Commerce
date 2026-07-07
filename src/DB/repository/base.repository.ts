@@ -62,7 +62,13 @@ export default class BaseRepository<TDocument> {
   }
 
   delete(id: string): Promise<HydratedDocument<TDocument> | null> {
-    return this.model.findByIdAndDelete(id).exec();
+    return this.model
+      .findByIdAndUpdate(
+        id,
+        { isDeleted: true, deletedAt: new Date() } as UpdateQuery<TDocument>,
+        { new: true },
+      )
+      .exec();
   }
 
   async paginate({
